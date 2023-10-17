@@ -372,6 +372,10 @@ extension CustomerSavedPaymentMethodsCollectionViewController: UICollectionViewD
 // MARK: - PaymentOptionCellDelegate
 /// :nodoc:
 extension CustomerSavedPaymentMethodsCollectionViewController: PaymentOptionCellDelegate {
+    func paymentOptionCellDidSelectEdit(_ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell) {
+        //TODO(porter) CustomerSheet CBC support
+    }
+    
     func paymentOptionCellDidSelectRemove(
         _ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell
     ) {

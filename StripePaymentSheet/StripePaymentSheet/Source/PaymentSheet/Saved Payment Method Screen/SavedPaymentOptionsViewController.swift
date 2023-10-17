@@ -48,6 +48,15 @@ class SavedPaymentOptionsViewController: UIViewController {
                 return false
             }
         }
+        
+        var isCoBrandedCard: Bool {
+            switch self {
+            case .applePay, .link, .add:
+                return false
+            case .saved(paymentMethod: let paymentMethod):
+                return paymentMethod.card?.networks?.preferred != nil
+            }
+        }
     }
 
     struct Configuration {
@@ -327,6 +336,10 @@ extension SavedPaymentOptionsViewController: UICollectionViewDataSource, UIColle
 // MARK: - PaymentOptionCellDelegate
 /// :nodoc:
 extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
+    func paymentOptionCellDidSelectEdit(_ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell) {
+        //TODO(porter) PaymentSheet CBC support
+    }
+    
     func paymentOptionCellDidSelectRemove(
         _ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell
     ) {
