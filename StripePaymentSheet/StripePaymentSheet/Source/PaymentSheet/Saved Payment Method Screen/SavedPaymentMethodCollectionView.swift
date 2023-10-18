@@ -112,6 +112,12 @@ extension SavedPaymentMethodCollectionView {
             }
         }
 
+        var cbcEligible: Bool = false
+        
+        var shouldAllowEditing: Bool {
+            return (viewModel?.isCoBrandedCard ?? false) && cbcEligible
+        }
+        
         // MARK: - UICollectionViewCell
 
         override init(frame: CGRect) {
@@ -214,11 +220,12 @@ extension SavedPaymentMethodCollectionView {
 
         // MARK: - Internal Methods
 
-        func setViewModel(_ viewModel: SavedPaymentOptionsViewController.Selection) {
+        func setViewModel(_ viewModel: SavedPaymentOptionsViewController.Selection, cbcEligible: Bool) {
             paymentMethodLogo.isHidden = false
             plus.isHidden = true
             shadowRoundedRectangle.isHidden = false
             self.viewModel = viewModel
+            self.cbcEligible = cbcEligible
             update()
         }
 
@@ -238,7 +245,7 @@ extension SavedPaymentMethodCollectionView {
         // MARK: - Private Methods
         @objc
         private func didSelectAccessory() {
-            if viewModel?.isCoBrandedCard ?? false {
+            if shouldAllowEditing {
                 delegate?.paymentOptionCellDidSelectEdit(self)
             } else {
                 delegate?.paymentOptionCellDidSelectRemove(self)
@@ -326,7 +333,7 @@ extension SavedPaymentMethodCollectionView {
             if isRemovingPaymentMethods {
                 if case .saved = viewModel {
                     accessoryButton.isHidden = false
-                    if viewModel?.isCoBrandedCard ?? false {
+                    if shouldAllowEditing {
                         accessoryButton.set(style: .edit, with: appearance.colors.danger)
                         accessoryButton.backgroundColor = UIColor.dynamic(
                             light: .systemGray5, dark: .tertiaryLabel)

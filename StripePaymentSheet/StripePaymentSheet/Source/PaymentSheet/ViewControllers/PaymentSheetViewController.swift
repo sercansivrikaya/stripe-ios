@@ -89,6 +89,7 @@ class PaymentSheetViewController: UIViewController {
                 removeSavedPaymentMethodMessage: configuration.removeSavedPaymentMethodMessage
             ),
             appearance: configuration.appearance,
+            cbcEligible: intent.cardBrandChoiceEligible,
             delegate: self
         )
     }()
