@@ -337,6 +337,13 @@ extension SavedPaymentOptionsViewController: UICollectionViewDataSource, UIColle
     }
 }
 
+// MARK: - UpdateCardViewControllerDelegate
+extension SavedPaymentOptionsViewController: UpdateCardViewControllerDelegate {
+    func didRemove(paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell) {
+        removePaymentMethod(paymentOptionCell: paymentOptionCell)
+    }
+}
+
 // MARK: - PaymentOptionCellDelegate
 /// :nodoc:
 extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
@@ -349,10 +356,48 @@ extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
             return
         }
         
-        let editVc = UpdateCardViewController(paymentMethod: paymentMethod, appearance: appearance)
+        let editVc = UpdateCardViewController(paymentOptionCell: paymentOptionCell,
+                                              paymentMethod: paymentMethod,
+                                              configuration: configuration,
+                                              appearance: appearance)
+        editVc.delegate = self
         self.bottomSheetController?.pushContentViewController(editVc)
     }
 
+    private func removePaymentMethod(paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell) {
+        guard let indexPath = collectionView.indexPath(for: paymentOptionCell),
+              case .saved(let paymentMethod) = viewModels[indexPath.row]
+        else {
+            assertionFailure()
+            return
+        }
+        let viewModel = viewModels[indexPath.row]
+        self.viewModels.remove(at: indexPath.row)
+        // the deletion needs to be in a performBatchUpdates so we make sure it is completed
+        // before potentially leaving edit mode (which triggers a reload that may collide with
+        // this deletion)
+        self.collectionView.performBatchUpdates {
+            self.collectionView.deleteItems(at: [indexPath])
+        } completion: { _ in
+            self.savedPaymentMethods.removeAll(where: {
+                $0.stripeId == paymentMethod.stripeId
+            })
+            
+            if let index = self.selectedViewModelIndex {
+                if indexPath.row == index {
+                    self.selectedViewModelIndex = min(1, self.viewModels.count - 1)
+                } else if indexPath.row < index {
+                    self.selectedViewModelIndex = index - 1
+                }
+            }
+            
+            self.delegate?.didSelectRemove(
+                viewController: self,
+                paymentMethodSelection: viewModel
+            )
+        }
+    }
+    
     func paymentOptionCellDidSelectRemove(
         _ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell
     ) {
@@ -362,34 +407,11 @@ extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
             assertionFailure()
             return
         }
-        let viewModel = viewModels[indexPath.row]
+        
         let alert = UIAlertAction(
             title: String.Localized.remove, style: .destructive
         ) { (_) in
-            self.viewModels.remove(at: indexPath.row)
-            // the deletion needs to be in a performBatchUpdates so we make sure it is completed
-            // before potentially leaving edit mode (which triggers a reload that may collide with
-            // this deletion)
-            self.collectionView.performBatchUpdates {
-                self.collectionView.deleteItems(at: [indexPath])
-            } completion: { _ in
-                self.savedPaymentMethods.removeAll(where: {
-                    $0.stripeId == paymentMethod.stripeId
-                })
-
-                if let index = self.selectedViewModelIndex {
-                    if indexPath.row == index {
-                        self.selectedViewModelIndex = min(1, self.viewModels.count - 1)
-                    } else if indexPath.row < index {
-                        self.selectedViewModelIndex = index - 1
-                    }
-                }
-
-                self.delegate?.didSelectRemove(
-                    viewController: self,
-                    paymentMethodSelection: viewModel
-                )
-            }
+            self.removePaymentMethod(paymentOptionCell: paymentOptionCell)
         }
         let cancel = UIAlertAction(
             title: String.Localized.cancel,

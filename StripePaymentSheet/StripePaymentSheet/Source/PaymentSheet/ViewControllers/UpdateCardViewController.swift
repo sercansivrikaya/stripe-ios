@@ -12,11 +12,19 @@ import Foundation
 @_spi(STP) import StripeUICore
 import UIKit
 
+protocol UpdateCardViewControllerDelegate: AnyObject {
+    func didRemove(paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell)
+}
+
 /// For internal SDK use only
 @objc(STP_Internal_UpdateCardViewController)
 class UpdateCardViewController: UIViewController {
     private let appearance: PaymentSheet.Appearance
+    private let configuration: SavedPaymentOptionsViewController.Configuration
     private let paymentMethod: STPPaymentMethod
+    private let paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell
+    
+    weak var delegate: UpdateCardViewControllerDelegate?
 
     // MARK: Navigation bar
 
@@ -49,9 +57,9 @@ class UpdateCardViewController: UIViewController {
     }()
 
     private lazy var updateButton: ConfirmButton = {
-        return ConfirmButton(state: .disabled, callToAction: .custom(title: .Localized.update_card), appearance: appearance) {
-            // TODO(porter) update card
-        }
+        return ConfirmButton(state: .disabled, callToAction: .custom(title: .Localized.update_card), appearance: appearance, didTap: {
+            // TODO(porter) Update card
+        })
     }()
 
     private lazy var deleteButton: ConfirmButton = {
@@ -59,7 +67,7 @@ class UpdateCardViewController: UIViewController {
         apperanceCopy.colors.primary = appearance.colors.background
         apperanceCopy.primaryButton.textColor = appearance.colors.danger
         return ConfirmButton(callToAction: .custom(title: .Localized.remove_card), appearance: apperanceCopy) {
-            // TODO(porter) Remove card
+            self.removeCard()
         }
     }()
 
@@ -94,8 +102,10 @@ class UpdateCardViewController: UIViewController {
 
     // MARK: Overrides
 
-    init(paymentMethod: STPPaymentMethod, appearance: PaymentSheet.Appearance) {
+    init(paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell, paymentMethod: STPPaymentMethod, configuration: SavedPaymentOptionsViewController.Configuration, appearance: PaymentSheet.Appearance) {
+        self.paymentOptionCell = paymentOptionCell
         self.paymentMethod = paymentMethod
+        self.configuration = configuration
         self.appearance = appearance
 
         super.init(nibName: nil, bundle: nil)
@@ -126,6 +136,37 @@ class UpdateCardViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
         ])
     }
+    
+    // MARK: Handlers
+    private func removeCard() {
+        let alert = UIAlertAction(
+            title: String.Localized.remove, style: .destructive
+        ) { [weak self] (_) in
+            guard let self = self else { return }
+            self.delegate?.didRemove(paymentOptionCell: self.paymentOptionCell)
+            self.dismiss()
+        }
+        let cancel = UIAlertAction(
+            title: String.Localized.cancel,
+            style: .cancel, handler: nil
+        )
+
+        let alertController = UIAlertController(
+            title: paymentMethod.removalMessage.title,
+            message: configuration.removeSavedPaymentMethodMessage ?? paymentMethod.removalMessage.message,
+            preferredStyle: .alert
+        )
+
+        alertController.addAction(cancel)
+        alertController.addAction(alert)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    private func updateCard() {
+        
+    }
+    
+    // MARK: Private helpers
 
     private func dismiss() {
         guard let bottomVc = parent as? BottomSheetViewController else { return }
@@ -174,6 +215,6 @@ extension UpdateCardViewController: ElementDelegate {
     func didUpdate(element: Element) {
         let selectedBrand = cardBrandDropDown.selectedItem.rawData
         let currentCardBrand = STPCard.brand(from: paymentMethod.card?.networks?.preferred ?? "").rawValue
-        updateButton.update(state: selectedBrand != "\(currentCardBrand)" ? .enabled : .disabled)
+        updateButton.update(state: selectedBrand != "\(currentCardBrand)" && selectedBrand != "-1" ? .enabled : .disabled)
     }
 }
