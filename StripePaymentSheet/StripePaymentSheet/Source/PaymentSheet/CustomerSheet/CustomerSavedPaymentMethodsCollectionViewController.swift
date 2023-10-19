@@ -339,7 +339,8 @@ extension CustomerSavedPaymentMethodsCollectionViewController: UICollectionViewD
             return UICollectionViewCell()
         }
 
-        cell.setViewModel(viewModel.toSavedPaymentOptionsViewControllerSelection())
+        // TODO(porter) CBC check in CustomerSheet
+        cell.setViewModel(viewModel.toSavedPaymentOptionsViewControllerSelection(), cbcEligible: false)
         cell.delegate = self
         cell.isRemovingPaymentMethods = self.collectionView.isRemovingPaymentMethods
         cell.appearance = appearance
@@ -373,9 +374,9 @@ extension CustomerSavedPaymentMethodsCollectionViewController: UICollectionViewD
 /// :nodoc:
 extension CustomerSavedPaymentMethodsCollectionViewController: PaymentOptionCellDelegate {
     func paymentOptionCellDidSelectEdit(_ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell) {
-        //TODO(porter) CustomerSheet CBC support
+        // TODO(porter) CustomerSheet CBC support
     }
-    
+
     func paymentOptionCellDidSelectRemove(
         _ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell
     ) {

@@ -113,11 +113,11 @@ extension SavedPaymentMethodCollectionView {
         }
 
         var cbcEligible: Bool = false
-        
+
         var shouldAllowEditing: Bool {
             return (viewModel?.isCoBrandedCard ?? false) && cbcEligible
         }
-        
+
         // MARK: - UICollectionViewCell
 
         override init(frame: CGRect) {

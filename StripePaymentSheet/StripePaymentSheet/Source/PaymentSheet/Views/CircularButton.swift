@@ -36,7 +36,7 @@ class CircularButton: UIControl {
         case remove
         case edit
     }
-    
+
     required init(style: Style, iconColor: UIColor = .secondaryLabel, dangerColor: UIColor = .systemRed) {
         self.style = style
         self.iconColor = iconColor
@@ -79,7 +79,7 @@ class CircularButton: UIControl {
             dy: -(PaymentSheetUI.minimumTapSize.height - bounds.height) / 2)
         return newArea.contains(point)
     }
-    
+
     public func set(style: CircularButton.Style, with dangerColor: UIColor) {
         switch style {
         case .back:

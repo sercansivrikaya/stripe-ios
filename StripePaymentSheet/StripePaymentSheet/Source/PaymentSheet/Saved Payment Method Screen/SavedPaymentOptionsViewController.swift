@@ -48,13 +48,14 @@ class SavedPaymentOptionsViewController: UIViewController {
                 return false
             }
         }
-        
+
         var isCoBrandedCard: Bool {
             switch self {
             case .applePay, .link, .add:
                 return false
             case .saved(paymentMethod: let paymentMethod):
-                return paymentMethod.card?.networks?.preferred != nil
+                guard let availableNetworks = paymentMethod.card?.networks?.available else { return false }
+                return availableNetworks.count > 1
             }
         }
     }
@@ -144,6 +145,7 @@ class SavedPaymentOptionsViewController: UIViewController {
     // MARK: - Private Properties
     private var selectedViewModelIndex: Int?
     private var viewModels: [Selection] = []
+    private var cbcEligible: Bool
 
     private var selectedIndexPath: IndexPath? {
         guard
@@ -176,6 +178,7 @@ class SavedPaymentOptionsViewController: UIViewController {
         self.savedPaymentMethods = savedPaymentMethods
         self.configuration = configuration
         self.appearance = appearance
+        self.cbcEligible = cbcEligible
         self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
         updateUI()
@@ -289,7 +292,7 @@ extension SavedPaymentOptionsViewController: UICollectionViewDataSource, UIColle
             assertionFailure()
             return UICollectionViewCell()
         }
-        cell.setViewModel(viewModel)
+        cell.setViewModel(viewModel, cbcEligible: cbcEligible)
         cell.delegate = self
         cell.isRemovingPaymentMethods = self.collectionView.isRemovingPaymentMethods
         cell.appearance = appearance
@@ -338,9 +341,20 @@ extension SavedPaymentOptionsViewController: UICollectionViewDataSource, UIColle
 /// :nodoc:
 extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
     func paymentOptionCellDidSelectEdit(_ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell) {
-        //TODO(porter) PaymentSheet CBC support
+        // TODO(porter) PaymentSheet CBC support
+        guard let indexPath = collectionView.indexPath(for: paymentOptionCell),
+              case .saved(let paymentMethod) = viewModels[indexPath.row]
+        else {
+            assertionFailure()
+            return
+        }
+        let editVc = EditCardViewController(paymentMethod: paymentMethod, appearance: appearance)
+
+        if let x = self.parent?.parent as? BottomSheetViewController {
+            x.pushContentViewController(editVc)
+        }
     }
-    
+
     func paymentOptionCellDidSelectRemove(
         _ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell
     ) {

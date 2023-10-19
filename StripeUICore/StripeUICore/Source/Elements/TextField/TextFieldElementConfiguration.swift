@@ -35,6 +35,8 @@ import UIKit
      */
     var defaultValue: String? { get }
 
+    var isEditable: Bool { get }
+
     /**
      Validate the text.
      
@@ -100,6 +102,10 @@ public extension TextFieldElementConfiguration {
     // Hide clear button by default
     var shouldShowClearButton: Bool {
         return false
+    }
+
+    var isEditable: Bool {
+        return true
     }
 
     func makeDisplayText(for text: String) -> NSAttributedString {

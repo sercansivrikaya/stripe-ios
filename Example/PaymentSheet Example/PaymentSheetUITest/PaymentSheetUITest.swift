@@ -1025,11 +1025,11 @@ class PaymentSheetStandardLPMUITests: PaymentSheetUITestCase {
         app.buttons["Present PaymentSheet"].waitForExistenceAndTap(timeout: 5)
         // Saved card should show the cartes bancaires logo
         XCTAssertTrue(app.images["card_cartes_bancaires"].waitForExistence(timeout: 5))
-        
+
         let editButton = app.staticTexts["Edit"]
         XCTAssertTrue(editButton.waitForExistence(timeout: 60.0))
         editButton.tap()
-        
+
         // Saved card should show the edit icon since it is co0branded
         XCTAssertTrue(app.images["icon_edit"].waitForExistence(timeout: 5))
     }
