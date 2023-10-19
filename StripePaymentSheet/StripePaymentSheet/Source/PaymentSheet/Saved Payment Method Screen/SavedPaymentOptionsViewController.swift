@@ -355,7 +355,7 @@ extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
             assertionFailure()
             return
         }
-        
+
         let editVc = UpdateCardViewController(paymentOptionCell: paymentOptionCell,
                                               paymentMethod: paymentMethod,
                                               configuration: configuration,
@@ -382,7 +382,7 @@ extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
             self.savedPaymentMethods.removeAll(where: {
                 $0.stripeId == paymentMethod.stripeId
             })
-            
+
             if let index = self.selectedViewModelIndex {
                 if indexPath.row == index {
                     self.selectedViewModelIndex = min(1, self.viewModels.count - 1)
@@ -390,14 +390,14 @@ extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
                     self.selectedViewModelIndex = index - 1
                 }
             }
-            
+
             self.delegate?.didSelectRemove(
                 viewController: self,
                 paymentMethodSelection: viewModel
             )
         }
     }
-    
+
     func paymentOptionCellDidSelectRemove(
         _ paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell
     ) {
@@ -407,7 +407,7 @@ extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
             assertionFailure()
             return
         }
-        
+
         let alert = UIAlertAction(
             title: String.Localized.remove, style: .destructive
         ) { (_) in

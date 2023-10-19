@@ -23,7 +23,7 @@ class UpdateCardViewController: UIViewController {
     private let configuration: SavedPaymentOptionsViewController.Configuration
     private let paymentMethod: STPPaymentMethod
     private let paymentOptionCell: SavedPaymentMethodCollectionView.PaymentOptionCell
-    
+
     weak var delegate: UpdateCardViewControllerDelegate?
 
     // MARK: Navigation bar
@@ -72,7 +72,7 @@ class UpdateCardViewController: UIViewController {
     }()
 
     // MARK: Elements
-    
+
     private lazy var panElement: TextFieldElement = {
         return TextFieldElement.LastFourConfiguration(lastFour: paymentMethod.card?.last4 ?? "", cardBrandDropDown: cardBrandDropDown).makeElement(theme: appearance.asElementsTheme)
     }()
@@ -136,7 +136,7 @@ class UpdateCardViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
         ])
     }
-    
+
     // MARK: Handlers
     private func removeCard() {
         let alert = UIAlertAction(
@@ -161,11 +161,11 @@ class UpdateCardViewController: UIViewController {
         alertController.addAction(alert)
         present(alertController, animated: true, completion: nil)
     }
-    
+
     private func updateCard() {
-        
+
     }
-    
+
     // MARK: Private helpers
 
     private func dismiss() {

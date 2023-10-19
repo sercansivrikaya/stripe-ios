@@ -1024,14 +1024,23 @@ class PaymentSheetStandardLPMUITests: PaymentSheetUITestCase {
         reload(app, settings: settings)
         app.buttons["Present PaymentSheet"].waitForExistenceAndTap(timeout: 5)
         // Saved card should show the cartes bancaires logo
+        XCTAssertTrue(app.staticTexts["••••1001"].waitForExistence(timeout: 5.0))
         XCTAssertTrue(app.images["card_cartes_bancaires"].waitForExistence(timeout: 5))
 
         let editButton = app.staticTexts["Edit"]
         XCTAssertTrue(editButton.waitForExistence(timeout: 60.0))
         editButton.tap()
 
-        // Saved card should show the edit icon since it is co0branded
-        XCTAssertTrue(app.images["icon_edit"].waitForExistence(timeout: 5))
+        // Saved card should show the edit icon since it is co-branded
+        XCTAssertTrue(app.buttons["CircularButton.Edit"].waitForExistenceAndTap(timeout: 5))
+        // Remove this card
+        XCTAssertTrue(app.buttons["Remove card"].waitForExistenceAndTap(timeout: 5))
+        let confirmRemoval = app.alerts.buttons["Remove"]
+        XCTAssertTrue(confirmRemoval.waitForExistence(timeout: 5))
+        confirmRemoval.tap()
+
+        // Card should be removed
+        XCTAssertFalse(app.staticTexts["••••1001"].waitForExistence(timeout: 5.0))
     }
 
     // This only tests the PaymentSheet + PaymentIntent flow.
