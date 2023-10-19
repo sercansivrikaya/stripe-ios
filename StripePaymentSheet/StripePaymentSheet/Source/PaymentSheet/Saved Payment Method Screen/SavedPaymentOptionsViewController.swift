@@ -348,11 +348,9 @@ extension SavedPaymentOptionsViewController: PaymentOptionCellDelegate {
             assertionFailure()
             return
         }
-        let editVc = EditCardViewController(paymentMethod: paymentMethod, appearance: appearance)
-
-        if let x = self.parent?.parent as? BottomSheetViewController {
-            x.pushContentViewController(editVc)
-        }
+        
+        let editVc = UpdateCardViewController(paymentMethod: paymentMethod, appearance: appearance)
+        self.bottomSheetController?.pushContentViewController(editVc)
     }
 
     func paymentOptionCellDidSelectRemove(

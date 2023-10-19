@@ -1,5 +1,5 @@
 //
-//  EditCardViewController.swift
+//  UpdateCardViewController.swift
 //  StripePaymentSheet
 //
 //  Created by Nick Porter on 10/18/23.
@@ -13,8 +13,8 @@ import Foundation
 import UIKit
 
 /// For internal SDK use only
-@objc(STP_Internal_EditCardViewController)
-class EditCardViewController: UIViewController {
+@objc(STP_Internal_UpdateCardViewController)
+class UpdateCardViewController: UIViewController {
     private let appearance: PaymentSheet.Appearance
     private let paymentMethod: STPPaymentMethod
 
@@ -37,6 +37,8 @@ class EditCardViewController: UIViewController {
         stackView.axis = .vertical
         stackView.spacing = PaymentSheetUI.defaultPadding
         stackView.setCustomSpacing(stackView.spacing * 2, after: cardSection.view)
+        stackView.setCustomSpacing(stackView.spacing / 2, after: updateButton)
+        stackView.layoutMargins.bottom = PaymentSheetUI.defaultPadding * 1.1
         return stackView
     }()
 
@@ -61,6 +63,8 @@ class EditCardViewController: UIViewController {
         }
     }()
 
+    // MARK: Elements
+    
     private lazy var panElement: TextFieldElement = {
         return TextFieldElement.LastFourConfiguration(lastFour: paymentMethod.card?.last4 ?? "", cardBrandDropDown: cardBrandDropDown).makeElement(theme: appearance.asElementsTheme)
     }()
@@ -132,7 +136,7 @@ class EditCardViewController: UIViewController {
 
 // MARK: BottomSheetContentViewController
 
-extension EditCardViewController: BottomSheetContentViewController {
+extension UpdateCardViewController: BottomSheetContentViewController {
 
     var allowsDragToDismiss: Bool {
         return false
@@ -149,7 +153,7 @@ extension EditCardViewController: BottomSheetContentViewController {
 
 // MARK: SheetNavigationBarDelegate
 
-extension EditCardViewController: SheetNavigationBarDelegate {
+extension UpdateCardViewController: SheetNavigationBarDelegate {
 
     func sheetNavigationBarDidClose(_ sheetNavigationBar: SheetNavigationBar) {
         dismiss()
@@ -162,7 +166,7 @@ extension EditCardViewController: SheetNavigationBarDelegate {
 }
 
 // MARK: ElementDelegate
-extension EditCardViewController: ElementDelegate {
+extension UpdateCardViewController: ElementDelegate {
     func continueToNextField(element: Element) {
         // no-op
     }
