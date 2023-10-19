@@ -44,12 +44,12 @@ class UpdateCardViewController: UIViewController {
 
     private lazy var headerLabel: UILabel = {
         let label = PaymentSheetUI.makeHeaderLabel(appearance: appearance)
-        label.text = "Update card"
+        label.text = .Localized.update_card
         return label
     }()
 
     private lazy var updateButton: ConfirmButton = {
-        return ConfirmButton(state: .disabled, callToAction: .custom(title: "Update card"), appearance: appearance) {
+        return ConfirmButton(state: .disabled, callToAction: .custom(title: .Localized.update_card), appearance: appearance) {
             // TODO(porter) update card
         }
     }()
@@ -58,7 +58,7 @@ class UpdateCardViewController: UIViewController {
         var apperanceCopy = appearance
         apperanceCopy.colors.primary = appearance.colors.background
         apperanceCopy.primaryButton.textColor = appearance.colors.danger
-        return ConfirmButton(callToAction: .custom(title: "Remove card"), appearance: apperanceCopy) {
+        return ConfirmButton(callToAction: .custom(title: .Localized.remove_card), appearance: apperanceCopy) {
             // TODO(porter) Remove card
         }
     }()

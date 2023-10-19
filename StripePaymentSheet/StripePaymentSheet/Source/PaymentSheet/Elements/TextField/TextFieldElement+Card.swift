@@ -15,31 +15,6 @@ import UIKit
 
 // MARK: - PAN Configuration
 extension TextFieldElement {
-    struct LastFourConfiguration: TextFieldElementConfiguration {
-        let label = "Card brand"
-        let lastFour: String
-        let isEditable = false
-        let cardBrandDropDown: DropdownFieldElement
-
-        private var lastFourFormatted: String {
-            "•••• •••• •••• \(lastFour)"
-        }
-
-        init(lastFour: String, cardBrandDropDown: DropdownFieldElement) {
-            self.lastFour = lastFour
-            self.cardBrandDropDown = cardBrandDropDown
-        }
-
-        func makeDisplayText(for text: String) -> NSAttributedString {
-            let attributedString = NSAttributedString(string: lastFourFormatted)
-
-            return attributedString
-        }
-
-        func accessoryView(for text: String, theme: ElementsUITheme) -> UIView? {
-            return TextFieldElement.PANConfiguration(cardBrandDropDown: cardBrandDropDown).accessoryView(for: lastFourFormatted, theme: theme)
-        }
-    }
 
     struct PANConfiguration: TextFieldElementConfiguration {
         var label: String = String.Localized.card_number
@@ -312,6 +287,35 @@ extension TextFieldElement {
                 text.insert("/", at: text.index(text.startIndex, offsetBy: 2))
             }
             return NSAttributedString(string: text)
+        }
+    }
+}
+
+// MARK: Last four configuration
+extension TextFieldElement {
+    struct LastFourConfiguration: TextFieldElementConfiguration {
+        let label = String.Localized.card_brand
+        let lastFour: String
+        let isEditable = false
+        let cardBrandDropDown: DropdownFieldElement
+
+        private var lastFourFormatted: String {
+            "•••• •••• •••• \(lastFour)"
+        }
+
+        init(lastFour: String, cardBrandDropDown: DropdownFieldElement) {
+            self.lastFour = lastFour
+            self.cardBrandDropDown = cardBrandDropDown
+        }
+
+        func makeDisplayText(for text: String) -> NSAttributedString {
+            return NSAttributedString(string: lastFourFormatted)
+        }
+
+        func accessoryView(for text: String, theme: ElementsUITheme) -> UIView? {
+            // Re-use same logic from PANConfiguration for accessory view
+            return TextFieldElement.PANConfiguration(cardBrandDropDown: cardBrandDropDown)
+                                            .accessoryView(for: lastFourFormatted, theme: theme)
         }
     }
 }
