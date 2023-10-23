@@ -15,7 +15,7 @@ import UIKit
 
 protocol PaymentSheetFlowControllerViewControllerDelegate: AnyObject {
     func paymentSheetFlowControllerViewControllerShouldClose(
-        _ PaymentSheetFlowControllerViewController: PaymentSheetFlowControllerViewController)
+        _ PaymentSheetFlowControllerViewController: PaymentSheetFlowControllerViewController, didCancel: Bool)
     func paymentSheetFlowControllerViewControllerDidUpdateSelection(
         _ PaymentSheetFlowControllerViewController: PaymentSheetFlowControllerViewController)
 }
@@ -78,7 +78,6 @@ class PaymentSheetFlowControllerViewController: UIViewController {
     private var isSavingInProgress: Bool = false
     private var isVerificationInProgress: Bool = false
     private let isApplePayEnabled: Bool
-
     private let isLinkEnabled: Bool
 
     // MARK: - Views
@@ -157,7 +156,8 @@ class PaymentSheetFlowControllerViewController: UIViewController {
                 customerID: configuration.customer?.id,
                 showApplePay: isApplePayEnabled,
                 showLink: isLinkEnabled,
-                removeSavedPaymentMethodMessage: configuration.removeSavedPaymentMethodMessage
+                removeSavedPaymentMethodMessage: configuration.removeSavedPaymentMethodMessage,
+                merchantDisplayName: configuration.merchantDisplayName
             ),
             appearance: configuration.appearance,
             cbcEligible: intent.cardBrandChoiceEligible
@@ -180,6 +180,7 @@ class PaymentSheetFlowControllerViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = configuration.appearance.colors.background
 
         // One stack view contains all our subviews
         let stackView = UIStackView(arrangedSubviews: [
@@ -383,7 +384,7 @@ class PaymentSheetFlowControllerViewController: UIViewController {
         switch mode {
         case .selectingSaved:
             if selectedPaymentMethodType.requiresMandateDisplayForSavedSelection {
-                self.bottomNoticeTextField.attributedText = savedPaymentOptionsViewController.bottomNoticeAttributedString
+                self.bottomNoticeTextField.attributedText = savedPaymentOptionsViewController.bottomNoticeAttributedString // TODO remove probably?
             } else {
                 self.bottomNoticeTextField.attributedText = nil
             }
@@ -400,20 +401,20 @@ class PaymentSheetFlowControllerViewController: UIViewController {
         STPAnalyticsClient.sharedClient.logPaymentSheetEvent(event: .paymentSheetConfirmButtonTapped)
         switch mode {
         case .selectingSaved:
-            self.delegate?.paymentSheetFlowControllerViewControllerShouldClose(self)
+            self.delegate?.paymentSheetFlowControllerViewControllerShouldClose(self, didCancel: false)
         case .addingNew:
             if let buyButtonOverrideBehavior = addPaymentMethodViewController.overrideBuyButtonBehavior {
                 addPaymentMethodViewController.didTapCallToActionButton(behavior: buyButtonOverrideBehavior, from: self)
             } else {
-                self.delegate?.paymentSheetFlowControllerViewControllerShouldClose(self)
+                self.delegate?.paymentSheetFlowControllerViewControllerShouldClose(self, didCancel: false)
             }
         }
 
     }
 
-    func didDismiss() {
+    func didDismiss(didCancel: Bool) {
         // If the customer was adding a new payment method and it's incomplete/invalid, return to the saved PM screen
-        delegate?.paymentSheetFlowControllerViewControllerShouldClose(self)
+        delegate?.paymentSheetFlowControllerViewControllerShouldClose(self, didCancel: didCancel)
         if savedPaymentOptionsViewController.isRemovingPaymentMethods {
             savedPaymentOptionsViewController.isRemovingPaymentMethods = false
             configureEditSavedPaymentMethodsButton()
@@ -431,7 +432,7 @@ extension PaymentSheetFlowControllerViewController: BottomSheetContentViewContro
 
     func didTapOrSwipeToDismiss() {
         if isDismissable {
-            didDismiss()
+            didDismiss(didCancel: true)
         }
     }
 
@@ -463,7 +464,7 @@ extension PaymentSheetFlowControllerViewController: SavedPaymentOptionsViewContr
             delegate?.paymentSheetFlowControllerViewControllerDidUpdateSelection(self)
             updateUI()
             if isDismissable, !selectedPaymentMethodType.requiresMandateDisplayForSavedSelection {
-                delegate?.paymentSheetFlowControllerViewControllerShouldClose(self)
+                delegate?.paymentSheetFlowControllerViewControllerShouldClose(self, didCancel: false)
             }
         }
     }
@@ -540,7 +541,7 @@ extension PaymentSheetFlowControllerViewController: AddPaymentMethodViewControll
 /// :nodoc:
 extension PaymentSheetFlowControllerViewController: SheetNavigationBarDelegate {
     func sheetNavigationBarDidClose(_ sheetNavigationBar: SheetNavigationBar) {
-        didDismiss()
+        didDismiss(didCancel: true)
     }
 
     func sheetNavigationBarDidBack(_ sheetNavigationBar: SheetNavigationBar) {
@@ -559,6 +560,6 @@ extension PaymentSheetFlowControllerViewController: SheetNavigationBarDelegate {
 // MARK: - PaymentSheetPaymentMethodType Helpers
 extension PaymentSheet.PaymentMethodType {
     var requiresMandateDisplayForSavedSelection: Bool {
-        return self == .USBankAccount
+        return self == .USBankAccount || self == .dynamic("sepa_debit")
     }
 }
