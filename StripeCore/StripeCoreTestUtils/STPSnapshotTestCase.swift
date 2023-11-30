@@ -12,7 +12,7 @@ let TEST_DEVICE_MODEL = "iPhone13,1" // iPhone 12 mini
 let TEST_DEVICE_OS_VERSION = "16.4"
 
 open class STPSnapshotTestCase: FBSnapshotTestCase {
-    
+
     open override func setUp() {
         super.setUp()
         let deviceModel = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"]!
@@ -22,7 +22,7 @@ open class STPSnapshotTestCase: FBSnapshotTestCase {
             XCTFail("You must run snapshot tests on \(TEST_DEVICE_MODEL) running \(TEST_DEVICE_OS_VERSION). You are running these tests on a \(deviceModel) on \(UIDevice.current.systemVersion).")
         }
     }
-    
+
     // Calls FBSnapshotVerifyView with a default 2% per-pixel color differentiation, as M1 and Intel machines render shadows differently.
     public func STPSnapshotVerifyView(
         _ view: UIView,
@@ -43,5 +43,5 @@ open class STPSnapshotTestCase: FBSnapshotTestCase {
             line: line
         )
     }
-    
+
 }
